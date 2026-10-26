@@ -1,0 +1,12 @@
+plugins { id 'base' }
+
+tasks.register('universalJar', Exec) {
+    group = 'build'
+    description = 'Builds every adapter and assembles one all-loader runtime JAR.'
+    commandLine 'python', 'tools/assemble_universal.py'
+}
+tasks.register('publishUniversal', Exec) {
+    group = 'publishing'
+    commandLine 'python', 'tools/assemble_universal.py', '--publish'
+}
+tasks.named('build') { dependsOn 'universalJar' }

@@ -1,0 +1,64 @@
+// Apply to a Modern Decorations Fabric 26.2 or 26.3 build with -I.
+gradle.projectsEvaluated {
+    def consumer=gradle.rootProject
+    if (consumer.findProperty('archives_base_name') == 'eqlib') return
+    def libraryRoot = new File(consumer.projectDir, '../../../../Sound Features/versions/opaleqsLibrary')
+    def fixture=consumer.layout.buildDirectory.dir('universal-runtime-mod')
+    def runDir=consumer.layout.buildDirectory.dir('universal-runtime-run')
+    def prepare=consumer.tasks.register('prepareUniversalRuntime', JavaCompile) {
+        dependsOn consumer.tasks.named('classes')
+        javaCompiler=consumer.javaToolchains.compilerFor(consumer.java.toolchain)
+        source new File(libraryRoot, consumer.providers.gradleProperty('universalClient').isPresent()
+                ? 'tests/universal26/UniversalClientTest.java' : 'tests/universal26/UniversalServerTest.java')
+        classpath=consumer.sourceSets.main.compileClasspath + consumer.sourceSets.main.output
+        options.compilerArgs.add('-proc:none')
+        destinationDirectory=fixture
+        doLast {
+            new File(fixture.get().asFile,'fabric.mod.json').text=groovy.json.JsonOutput.toJson([
+                schemaVersion:1,id:'eqlib_universal_test',version:'1.0.0',
+                entrypoints:(consumer.providers.gradleProperty('universalClient').isPresent()
+                    ? [client:['com.cookiecraftmods.eqlib.tests.UniversalClientTest']]
+                    : [main:['com.cookiecraftmods.eqlib.tests.UniversalServerTest']]),depends:[mdm:'*',eqlib:'*']])
+        }
+    }
+    consumer.loom.runs.server.runDir(runDir.get().asFile.absolutePath)
+    consumer.tasks.named('runServer') {
+        dependsOn prepare
+        classpath += consumer.files(fixture)
+        workingDir runDir
+        args 'nogui'
+        doFirst {
+            runDir.get().asFile.mkdirs()
+            new File(runDir.get().asFile,'universal-server-result.txt').delete()
+            new File(runDir.get().asFile,'eula.txt').text='eula=true\n'
+            new File(runDir.get().asFile,'server.properties').text='online-mode=false\nserver-port=0\nview-distance=2\nsimulation-distance=2\nlevel-type=minecraft:flat\nmax-tick-time=-1\n'
+        }
+        doLast {
+            if (!new File(runDir.get().asFile,'universal-server-result.txt').isFile()) throw new GradleException('Universal runtime checks did not finish')
+        }
+    }
+    if (consumer.providers.gradleProperty('universalClient').isPresent()) {
+        def clientRun=consumer.layout.buildDirectory.dir('universal-client-run')
+        consumer.loom.runs.client.runDir(clientRun.get().asFile.absolutePath)
+        consumer.loom.runs.client.programArgs '--quickPlaySingleplayer', 'universal-test', '--width', '1100', '--height', '760'
+        consumer.tasks.named('runClient') {
+            dependsOn prepare
+            classpath += consumer.files(fixture)
+            workingDir clientRun
+            doFirst {
+                def dir=clientRun.get().asFile
+                dir.mkdirs()
+                new File(dir,'universal-client-result.txt').delete()
+                new File(dir,'options.txt').text='onboardAccessibility:false\nrenderDistance:4\nsimulationDistance:5\npauseOnLostFocus:false\nmaxFps:60\n'
+                def world=new File(dir,'saves/universal-test')
+                if (!new File(world,'level.dat').exists()) {
+                    consumer.copy { from new File(runDir.get().asFile,'world'); into world }
+                }
+            }
+            doLast {
+                if (!new File(clientRun.get().asFile,'universal-client-result.txt').isFile()) throw new GradleException('Universal client checks did not finish')
+            }
+        }
+    }
+
+}

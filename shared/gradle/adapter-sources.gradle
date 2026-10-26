@@ -1,0 +1,7 @@
+import groovy.json.JsonSlurper
+
+sourceSets.main.java.srcDir(project.file('../../shared/core'))
+def groups = new JsonSlurper().parse(project.file('../../shared/source-groups.json')).groups
+groups.findAll { project.projectDir.name in it.targets }.each {
+    sourceSets.main.java.srcDir(project.file('../../' + it.java))
+}

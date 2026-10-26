@@ -1,0 +1,7 @@
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net/' }
+        gradlePluginPortal()
+    }
+}
+rootProject.name = 'eqlib-forge_1.16.5-forge-1.16.5'

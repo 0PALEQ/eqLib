@@ -1,0 +1,70 @@
+import groovy.json.JsonSlurper
+
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.17.14'
+    id 'maven-publish'
+}
+
+if (providers.gradleProperty('eqlibBuildDir').isPresent()) {
+    layout.buildDirectory = file(providers.gradleProperty('eqlibBuildDir').get())
+}
+version = project.mod_version
+def libraryVersion = project.version.toString()
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+tasks.withType(org.gradle.api.tasks.bundling.AbstractArchiveTask).configureEach {
+    archiveVersion = "${project.mod_version}-${project.loader_name}-${project.minecraft_version}"
+}
+
+repositories {
+    // Loom supplies the Minecraft and Fabric repositories.
+}
+
+loom {
+    runs {
+        client {
+            client()
+            name = 'opaleqs Library Client'
+        }
+        server {
+            server()
+            name = 'opaleqs Library Server'
+        }
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+}
+
+
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+}
+
+
+group = 'com.cookiecraftmods'
+java { withSourcesJar() }
+processResources {
+    inputs.property 'libraryVersion', libraryVersion
+    filesMatching(['fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml']) {
+        expand(version: libraryVersion, mod_version: libraryVersion)
+    }
+}
+// This adapter is an internal build input; the root tooling publishes the universal distribution.
+
+// A consumer run already loads eqlib; avoid launching a second game from the nested project.
+if (project != rootProject) {
+    tasks.matching { it.name in ['runClient', 'runServer', 'runData'] }.configureEach { enabled = false }
+}
+
+apply from: project.file('../../shared/gradle/adapter-sources.gradle')

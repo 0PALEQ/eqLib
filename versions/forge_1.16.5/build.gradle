@@ -1,0 +1,56 @@
+buildscript {
+    repositories { maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }; maven { url = 'https://maven.minecraftforge.net/' }; mavenCentral() }
+    dependencies { classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT' }
+}
+plugins {
+    id 'net.minecraftforge.gradle' version '6.0.54'
+
+}
+if (providers.gradleProperty('eqlibBuildDir').isPresent()) {
+    layout.buildDirectory = file(providers.gradleProperty('eqlibBuildDir').get())
+}
+version = project.mod_version
+def libraryVersion = project.version.toString()
+group = project.maven_group
+base { archivesName = project.archives_base_name }
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+repositories { mavenCentral(); maven { url = 'https://repo.spongepowered.org/repository/maven-public/' } }
+minecraft {
+    mappings channel: 'official', version: '1.16.5'
+    runs {
+        client { workingDirectory project.file('run/client'); mods { eqlib { source sourceSets.main } } }
+        server { workingDirectory project.file('run/server'); mods { eqlib { source sourceSets.main } } }
+    }
+}
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+}
+
+
+apply plugin: 'org.spongepowered.mixin'
+mixin { add sourceSets.main, 'eqlib.refmap.json'; config 'eqlib.mixins.json' }
+jar { manifest.attributes 'MixinConfigs': 'eqlib.mixins.json'; finalizedBy 'reobfJar' }
+dependencies { annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:1.0.0' }
+tasks.withType(JavaCompile).configureEach { options.release = 8; javaCompiler = javaToolchains.compilerFor { languageVersion = JavaLanguageVersion.of(17) } }
+
+group = 'com.cookiecraftmods'
+java { withSourcesJar() }
+processResources {
+    inputs.property 'libraryVersion', libraryVersion
+    filesMatching(['fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml']) {
+        expand(version: libraryVersion, mod_version: libraryVersion)
+    }
+}
+// This adapter is an internal build input; the root tooling publishes the universal distribution.
+
+// A consumer run already loads eqlib; avoid launching a second game from the nested project.
+if (project != rootProject) {
+    tasks.matching { it.name in ['runClient', 'runServer', 'runData'] }.configureEach { enabled = false }
+}
+
+tasks.withType(org.gradle.api.tasks.bundling.AbstractArchiveTask).configureEach {
+    archiveVersion = "${project.mod_version}-${project.loader_name}-${project.minecraft_version}"
+}
+
+apply from: project.file('../../shared/gradle/adapter-sources.gradle')

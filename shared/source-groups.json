@@ -1,0 +1,156 @@
+{
+  "groups": [
+    {
+      "java": "shared/code/fabric-26.2-26.3",
+      "targets": [
+        "fabric_26.2-26.3"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/registry-legacy",
+      "targets": [
+        "fabric_1.20.1",
+        "forge_1.19.2",
+        "forge_1.20.1"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/geometry-named",
+      "targets": [
+        "fabric_1.20.1",
+        "fabric_1.21.1",
+        "fabric_1.21.11",
+        "fabric_26.1.2",
+        "forge_1.20.1",
+        "neoforge_1.21.1",
+        "neoforge_1.21.11",
+        "neoforge_26.1.2",
+        "neoforge_26.2"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/helper-1.20",
+      "targets": [
+        "fabric_1.20.1",
+        "forge_1.20.1"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/placement-named",
+      "targets": [
+        "fabric_1.20.1",
+        "fabric_1.21.1",
+        "fabric_1.21.11",
+        "fabric_26.1.2",
+        "forge_1.19.2",
+        "forge_1.20.1",
+        "neoforge_1.21.1",
+        "neoforge_1.21.11",
+        "neoforge_26.1.2",
+        "neoforge_26.2"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/pixel-offset-legacy",
+      "targets": [
+        "fabric_1.20.1",
+        "fabric_1.21.1",
+        "forge_1.20.1",
+        "neoforge_1.21.1"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/client-cache",
+      "targets": [
+        "fabric_1.20.1",
+        "fabric_1.21.1",
+        "fabric_1.21.11",
+        "fabric_26.1.2",
+        "forge_1.16.5",
+        "forge_1.19.2",
+        "forge_1.20.1",
+        "neoforge_1.21.1",
+        "neoforge_1.21.11",
+        "neoforge_26.1.2",
+        "neoforge_26.2"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/preview-legacy",
+      "targets": [
+        "fabric_1.20.1",
+        "fabric_1.21.1",
+        "forge_1.19.2",
+        "forge_1.20.1",
+        "neoforge_1.21.1"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/registry-modern",
+      "targets": [
+        "fabric_1.21.1",
+        "fabric_1.21.11",
+        "fabric_26.1.2",
+        "neoforge_1.21.1",
+        "neoforge_1.21.11",
+        "neoforge_26.1.2",
+        "neoforge_26.2"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/helper-1.21.1",
+      "targets": [
+        "fabric_1.21.1",
+        "neoforge_1.21.1"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/helper-modern",
+      "targets": [
+        "fabric_1.21.11",
+        "fabric_26.1.2",
+        "neoforge_1.21.11",
+        "neoforge_26.1.2",
+        "neoforge_26.2"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/preview-1.21.11",
+      "targets": [
+        "fabric_1.21.11",
+        "neoforge_1.21.11"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/preview-26.1",
+      "targets": [
+        "fabric_26.1.2",
+        "neoforge_26.1.2"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/forge-entrypoint",
+      "targets": [
+        "forge_1.16.5",
+        "forge_1.19.2",
+        "forge_1.20.1"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/neoforge-entrypoint",
+      "targets": [
+        "neoforge_1.21.1",
+        "neoforge_1.21.11",
+        "neoforge_26.1.2",
+        "neoforge_26.2"
+      ]
+    },
+    {
+      "java": "shared/code/compatible/seat-neoforge26",
+      "targets": [
+        "neoforge_26.1.2",
+        "neoforge_26.2"
+      ]
+    }
+  ]
+}

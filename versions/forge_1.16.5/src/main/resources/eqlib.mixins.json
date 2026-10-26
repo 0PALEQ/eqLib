@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.cookiecraftmods.eqlib.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "eqlib.refmap.json",
+  "mixins": [
+    "PixelPlacementOffsetMixin",
+    "PlacementEntityMixin",
+    "DecorationDynamicShapeMixin",
+    "PlacementPersistenceMixin",
+    "DecorationPlacementItemMixin",
+    "DecorationPlacementShapeMixin",
+    "SeatLifecycleMixin"
+  ],
+  "client": [
+    "PlacementClientMixin",
+    "PlacementPreviewMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

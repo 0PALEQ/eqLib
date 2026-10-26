@@ -1,0 +1,14 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="All-Rights-Reserved"
+[[mods]]
+modId="eqlib"
+version="${version}"
+displayName="opaleq's Library"
+description="Shared precise placement, helper blocks and seating."
+[[dependencies.eqlib]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.16.5]"
+ordering="NONE"
+side="BOTH"
