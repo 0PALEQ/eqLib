@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 from verify_universal_bundle import ROOT, TARGETS, verify
+from project_paths import runtime_jar
 
 
 def require(condition, message):
@@ -18,7 +19,7 @@ def read_log(path):
 
 def record(consumer):
     verify()
-    artifact = ROOT/'dist/eqlib-universal.jar'
+    artifact = runtime_jar()
     checksum = hashlib.sha256(artifact.read_bytes()).hexdigest()
     builds = json.loads((consumer/'build/eqlib-matrix/results.json').read_text())
     runtime = json.loads((consumer/'build/eqlib-runtime/results.json').read_text())

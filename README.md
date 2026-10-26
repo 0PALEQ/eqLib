@@ -1,6 +1,6 @@
 # opaleq's Library (`eqlib`)
 
-Shared precise placement, helper-block footprints, seating, and clock utilities for Minecraft mods. Install `dist/eqlib-universal.jar` on both client and server. The same runtime file selects the adapter for the supported Minecraft version and loader.
+Shared precise placement, helper-block footprints, seating, and clock utilities for Minecraft mods. Install `dist/eqlib-<mod_version>.jar` on both client and server. The same runtime file selects the adapter for the supported Minecraft version and loader.
 
 See the [API guide](docs/API.md) for integration and the [universal JAR guide](docs/UNIVERSAL.md) for packaging and development setup.
 

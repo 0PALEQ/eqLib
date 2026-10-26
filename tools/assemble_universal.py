@@ -8,6 +8,7 @@ import os
 import subprocess
 import zipfile
 from java_tools import jdk
+from project_paths import runtime_jar
 
 ROOT=Path(__file__).resolve().parents[1]
 CACHE=Path.home()/'.gradle/caches/modules-2/files-2.1'
@@ -120,7 +121,7 @@ def assemble():
         'net.neoforged.neoforgespi.locating.IDependencyLocator':'com.cookiecraftmods.eqlib.bootstrap.neoforge.DependencyLocator',
     }
     for interface,implementation in services.items():entries['META-INF/services/'+interface]=(implementation+'\n').encode()
-    output=ROOT/'dist/eqlib-universal.jar';output.parent.mkdir(exist_ok=True)
+    output=runtime_jar();output.parent.mkdir(exist_ok=True)
     data=zip_bytes(entries)
     temporary=output.with_suffix('.jar.tmp')
     try:

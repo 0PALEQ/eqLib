@@ -7,12 +7,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 from java_tools import jdk
+from project_paths import runtime_jar
 
 
 def verify():
     output = ROOT/'build/bootstrap-test/classes'
     output.mkdir(parents=True, exist_ok=True)
-    artifact = ROOT/'dist/eqlib-universal.jar'
+    artifact = runtime_jar()
     subprocess.run([str(jdk(25)/'bin/javac.exe'), '--release', '8', '-proc:none', '-d', str(output),
                     '-classpath', str(artifact), str(ROOT/'tests/bootstrap/BootstrapCacheTest.java')], check=True)
     run = ROOT/'build/bootstrap-test/run'

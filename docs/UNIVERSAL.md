@@ -1,6 +1,6 @@
 # Universal runtime JAR
 
-`dist/eqlib-universal.jar` contains the adapters for every loader/game combination in the [supported matrix](../README.md#supported-targets). Install the same file on both client and server. Install one eqlib runtime per instance; remove superseded eqlib runtime files when updating.
+`dist/eqlib-<mod_version>.jar` contains the adapters for every loader/game combination in the [supported matrix](../README.md#supported-targets). Install the same file on both client and server. Install one eqlib runtime per instance; remove superseded eqlib runtime files when updating.
 
 ?Universal? covers this explicit matrix. It does not promise compatibility with untested Minecraft releases or additional loaders. A consumer mod still needs its own compatible build for its game and loader.
 
@@ -27,7 +27,7 @@ python tools/assemble_universal.py --from-builds --publish
 
 The first command builds all internal adapters before packaging. `--from-builds` is for packaging already completed adapter outputs. Rebuild after source changes. `python tools/build_matrix.py build` and `publish` also assemble the universal distribution after the complete adapter matrix succeeds. Targeted builds only build the selected internal adapters.
 
-The output is `dist/eqlib-universal.jar`. Publication writes a main universal runtime and development API classifiers to the checkout's local `maven/` repository. Internal adapters are build inputs, not additional installation requirements.
+The output is `dist/eqlib-<mod_version>.jar`, currently `dist/eqlib-1.0.3.jar`. The filename follows the canonical adapter's `mod_version`. Publication writes a main universal runtime and development API classifiers to the checkout's local `maven/` repository. Internal adapters are build inputs, not additional installation requirements.
 
 ## Develop a consumer
 

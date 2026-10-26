@@ -5,6 +5,7 @@ import io
 import json
 import struct
 import zipfile
+from project_paths import runtime_jar
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS = {
@@ -26,7 +27,7 @@ def class_version(data):
 
 
 def verify():
-    artifact = ROOT / 'dist/eqlib-universal.jar'
+    artifact = runtime_jar()
     with zipfile.ZipFile(artifact) as outer:
         index = dict(line.split('=', 1) for line in outer.read('META-INF/eqlib/adapters.properties').decode().splitlines() if line)
         require(set(index) == {t + '.' + m for t in TARGETS for m in ['prod', 'dev']}, 'Unexpected adapter matrix')

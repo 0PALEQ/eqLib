@@ -85,7 +85,7 @@ Install one universal eqlib runtime alongside your mod on **both clients and ser
 
 ### Working from a checkout
 
-Modern Decorations' `shared/gradle/eqlib.gradle` uses `dist/eqlib-universal.jar` and `build/api/eqlib-<loader>_<minecraft>.jar` after building this checkout. It falls back to the local Maven publication when these outputs are absent. `EQLIB_DIR`, `-PeqlibDir`, and `-PeqlibMaven` are features of that consumer script. Rebuild the library after editing shared sources; MDM no longer includes a second library mod through a source or composite build.
+Configure Modern Decorations' `shared/gradle/eqlib.gradle` to use `dist/eqlib-<mod_version>.jar` and `build/api/eqlib-<loader>_<minecraft>.jar` after building this checkout. It falls back to the local Maven publication when these outputs are absent. `EQLIB_DIR`, `-PeqlibDir`, and `-PeqlibMaven` are features of that consumer script. Rebuild the library after editing shared sources; MDM no longer includes a second library mod through a source or composite build.
 
 ## Initialization order and ownership
 
