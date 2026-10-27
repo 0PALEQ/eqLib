@@ -3,6 +3,7 @@
   "id": "eqlib",
   "version": "${version}",
   "name": "opaleq's Library",
+  "icon": "icon.png",
   "environment": "*",
   "mixins": [
     "eqlib.mixins.json"

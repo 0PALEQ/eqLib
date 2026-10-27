@@ -23,7 +23,6 @@ import net.minecraftforge.fml.RegistryObject;
 public final class SeatBlock {
 	private static final String SEAT_TAG = "eqlib:seat";
     private static final String OWNER_TAG = "eqlib:seat_owner:";
-    // Weak references do not retain unloaded worlds or their entities.
     private static final Map<World, Map<String, java.lang.ref.WeakReference<ArmorStandEntity>>> SEATS = new java.util.WeakHashMap<>();
 
     private static String ownerTag(BlockPos pos) { return OWNER_TAG + pos.asLong(); }

@@ -5,6 +5,7 @@ license="All-Rights-Reserved"
 modId="eqlib"
 version="${version}"
 displayName="opaleq's Library"
+logoFile="icon.png"
 description="Shared precise placement, helper blocks and seating."
 [[dependencies.eqlib]]
 modId="minecraft"

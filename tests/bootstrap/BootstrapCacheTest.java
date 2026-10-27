@@ -7,10 +7,18 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 
 /** Exercise the distribution on Java 8 without initializing any Minecraft or loader class. */
 public final class BootstrapCacheTest {
     public static void main(String[] args) throws Exception {
+        Path distribution = java.nio.file.Paths.get(Payloads.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        try (JarInputStream stream = new JarInputStream(Files.newInputStream(distribution))) {
+            if (stream.getManifest() == null || !"com.cookiecraftmods.eqlib.bootstrap".equals(
+                    stream.getManifest().getMainAttributes().getValue("Automatic-Module-Name"))) {
+                throw new AssertionError("Streaming reader lost bootstrap module identity");
+            }
+        }
         Properties index = new Properties();
         try (InputStream stream = Payloads.class.getResourceAsStream("/META-INF/eqlib/adapters.properties")) {
             index.load(stream);
@@ -22,6 +30,13 @@ public final class BootstrapCacheTest {
             String loader = key.substring(0, split);
             String game = key.substring(split + 1, key.lastIndexOf('.'));
             Path selected = Payloads.select(loader, game, key.endsWith(".dev"));
+            try (JarInputStream stream = new JarInputStream(Files.newInputStream(selected))) {
+                if (stream.getManifest() == null) throw new AssertionError("Streaming reader lost adapter manifest: " + key);
+                if (loader.equals("forge") && !"eqlib.mixins.json".equals(
+                        stream.getManifest().getMainAttributes().getValue("MixinConfigs"))) {
+                    throw new AssertionError("Streaming reader lost Forge mixin configuration: " + key);
+                }
+            }
             try (JarFile jar = new JarFile(selected.toFile())) {
                 if (jar.getJarEntry("eqlib.mixins.json") == null
                         || jar.getJarEntry("com/cookiecraftmods/eqlib/core/clock/ClockTime.class") == null) {

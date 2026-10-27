@@ -49,7 +49,8 @@ def compile_bootstrap():
 def zip_bytes(entries):
     stream=io.BytesIO()
     with zipfile.ZipFile(stream,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as archive:
-        for name,data in sorted(entries.items()):
+        # Streaming JAR readers only recognize a manifest at the beginning.
+        for name,data in sorted(entries.items(), key=lambda item: (item[0] != 'META-INF/MANIFEST.MF', item[0])):
             info=zipfile.ZipInfo(name,(1980,1,1,0,0,0));info.compress_type=zipfile.ZIP_DEFLATED
             archive.writestr(info,data)
     return stream.getvalue()
@@ -92,6 +93,7 @@ def assemble():
     entries['META-INF/MANIFEST.MF']=('Manifest-Version: 1.0\r\nAutomatic-Module-Name: com.cookiecraftmods.eqlib.bootstrap\r\nFMLModType: LIBRARY\r\nImplementation-Version: '+version+'\r\n\r\n').encode()
     entries['META-INF/eqlib/core.jar']=core
     entries['LICENSE.txt']=(ROOT/'LICENSE.txt').read_bytes()
+    entries['icon.png']=(ROOT/'shared/resources/icon.png').read_bytes()
     index=[];games=set();targets=[]
     for target in sorted((ROOT/'versions').iterdir()):
         if not (target/'build.gradle').exists():continue
@@ -113,7 +115,7 @@ def assemble():
             api.parent.mkdir(parents=True,exist_ok=True)
             api.write_bytes(development_api)
     entries['META-INF/eqlib/adapters.properties']=('\n'.join(index)+'\n').encode()
-    entries['fabric.mod.json']=json.dumps({'schemaVersion':1,'id':'eqlib','version':version,'name':"opaleq's Library",'environment':'*','mixins':['eqlib.mixins.json'],'depends':{'minecraft':sorted(games),'java':'>=8','fabricloader':'>=0.16.14'}},indent=2).encode()
+    entries['fabric.mod.json']=json.dumps({'schemaVersion':1,'id':'eqlib','version':version,'name':"opaleq's Library",'icon':'icon.png','environment':'*','mixins':['eqlib.mixins.json'],'depends':{'minecraft':sorted(games),'java':'>=8','fabricloader':'>=0.16.14'}},indent=2).encode()
     entries['eqlib.mixins.json']=json.dumps({'required':True,'minVersion':'0.8','package':'com.cookiecraftmods.eqlib.mixin','compatibilityLevel':'JAVA_8','plugin':'com.cookiecraftmods.eqlib.bootstrap.fabric.MixinSelector','mixins':[],'client':[],'injectors':{'defaultRequire':1}},indent=2).encode()
     services={
         'net.minecraftforge.forgespi.locating.IModLocator':'com.cookiecraftmods.eqlib.bootstrap.forge.LegacyLocator',

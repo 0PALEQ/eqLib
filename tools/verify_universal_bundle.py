@@ -29,6 +29,7 @@ def class_version(data):
 def verify():
     artifact = runtime_jar()
     with zipfile.ZipFile(artifact) as outer:
+        require(outer.namelist()[0] == 'META-INF/MANIFEST.MF', 'Bootstrap manifest must be first for streaming JAR readers')
         index = dict(line.split('=', 1) for line in outer.read('META-INF/eqlib/adapters.properties').decode().splitlines() if line)
         require(set(index) == {t + '.' + m for t in TARGETS for m in ['prod', 'dev']}, 'Unexpected adapter matrix')
         fabric = json.loads(outer.read('fabric.mod.json'))
@@ -43,6 +44,7 @@ def verify():
         for target in sorted(TARGETS):
             for mode in ['prod', 'dev']:
                 with zipfile.ZipFile(io.BytesIO(outer.read(index[target + '.' + mode]))) as adapter:
+                    require(adapter.namelist()[0] == 'META-INF/MANIFEST.MF', 'Adapter manifest must be first: ' + target)
                     names = set(adapter.namelist())
                     require('com/cookiecraftmods/eqlib/api/FurnitureApi.class' in names, 'Missing public API: ' + target)
                     require(not any(n.startswith('com/cookiecraftmods/eqlib/core/') for n in names), 'Duplicated core: ' + target)

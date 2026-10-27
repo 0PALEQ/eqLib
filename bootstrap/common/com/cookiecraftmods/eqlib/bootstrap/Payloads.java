@@ -54,7 +54,8 @@ public final class Payloads {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         Set<String> names = new HashSet<>();
         try (JarOutputStream jar = new JarOutputStream(output)) {
-            for (String resource : new String[] {"/META-INF/eqlib/core.jar", null}) {
+            // Keep the adapter manifest first for Forge's streaming JAR reader.
+            for (String resource : new String[] {null, "/META-INF/eqlib/core.jar"}) {
                 InputStream raw = resource == null ? new ByteArrayInputStream(adapter) : Payloads.class.getResourceAsStream(resource);
                 if (raw == null) throw new IOException("Missing eqlib core");
                 // ZipInputStream preserves the adapter manifest as a regular entry.

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/** Immutable, renderer-independent mesh for a named hand in a model JSON. */
 public final class ClockHandMesh {
     private final List<Vertex> vertices;
     private final double pivotZ;
