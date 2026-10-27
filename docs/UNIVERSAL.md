@@ -1,8 +1,10 @@
-# Universal runtime JAR
+# Maintainer guide: universal runtime JAR
+
+**Audience: eqlib maintainers and contributors developing the library itself.** This guide covers the universal runtime architecture, building, publishing, and release validation. If you are using eqlib in your own mod, follow the [API guide](API.md), including its [dependency and development-run setup](API.md#install-the-dependency). You do not need to modify the library source to integrate its public features.
 
 `dist/eqlib-<mod_version>.jar` contains the adapters for every loader/game combination in the [supported matrix](../README.md#supported-targets). Install the same file on both client and server. Install one eqlib runtime per instance; remove superseded eqlib runtime files when updating.
 
-?Universal? covers this explicit matrix. It does not promise compatibility with untested Minecraft releases or additional loaders. A consumer mod still needs its own compatible build for its game and loader.
+"Universal" covers this explicit matrix. A consumer mod still needs its own compatible build for its game and loader.
 
 ## Architecture
 
@@ -18,51 +20,35 @@ Fabric 26.2 and 26.3 reuse one payload. Its cached seating compatibility handle 
 
 ## Build and publish
 
+Run these commands from the library checkout on Windows. Install Python 3 and JDKs 17, 21, and 25 first; set `JAVA17_HOME`, `JAVA21_HOME`, and `JAVA25_HOME` if automatic discovery cannot find them. The bootstrap verification command additionally requires JDK 8 (`JAVA8_HOME`). These are library-build prerequisites, not a requirement for every consumer to build the entire matrix on each development run.
+
 ```powershell
+python tools/verify_boundaries.py
 python tools/assemble_universal.py
 python tools/verify_universal_bundle.py
 python tools/verify_bootstrap.py
-python tools/assemble_universal.py --from-builds --publish
 ```
 
-The first command builds all internal adapters before packaging. `--from-builds` is for packaging already completed adapter outputs. Rebuild after source changes. `python tools/build_matrix.py build` and `publish` also assemble the universal distribution after the complete adapter matrix succeeds. Targeted builds only build the selected internal adapters.
+The assembly command builds all required adapters and packages them into one universal runtime JAR. Rebuild after source changes. Distribute only `dist/eqlib-<mod_version>.jar`; users do not select or install individual adapters.
 
-The output is `dist/eqlib-<mod_version>.jar`, currently `dist/eqlib-1.0.3.jar`. The filename follows the canonical adapter's `mod_version`. Publication writes a main universal runtime and development API classifiers to the checkout's local `maven/` repository. Internal adapters are build inputs, not additional installation requirements.
+To also publish the universal runtime and development API classifiers to the local Maven repository, run:
 
-## Develop a consumer
-
-Use the main artifact at runtime and the matching named API classifier at compile time. For example, for a Mojang-mapped Fabric 1.21.1 build:
-
-```groovy
-repositories {
-    maven { url = uri('path/to/opaleqsLibrary/maven') }
-}
-dependencies {
-    compileOnly "com.cookiecraftmods:eqlib:${eqlib_version}:dev-fabric_1.21.1"
-    runtimeOnly "com.cookiecraftmods:eqlib:${eqlib_version}"
-}
+```powershell
+python tools/assemble_universal.py --publish
 ```
 
-Keep the runtime as an ordinary runtime dependency; do not send the entire universal JAR through Loom remapping or Forge reobfuscation. API classifiers are already named for their target's mappings and are development-only. They contain the implementation needed by standalone verification programs, but must not be installed in a game or shaded into a consumer JAR. An independently configured Yarn-mapped consumer must translate its compile API to its own mappings.
+The output is `dist/eqlib-<mod_version>.jar`. The filename follows `mod_version` in `versions/fabric_26.2-26.3/gradle.properties`. Publication writes a main universal runtime and development API classifiers to the checkout's local `maven/` repository. Internal adapters are build inputs, not additional installation requirements.
 
-Forge/NeoForge early discovery must see the universal runtime in the development run's `mods/` directory before the JVM starts. Copy the resolved main artifact there with a Gradle `Copy` task and make the game run depend on that task. Set `eqlib.development=true` through your loader's run configuration. Never put the named API classifier in `mods/`. See Modern Decorations' `shared/gradle/eqlib.gradle` for ForgeGradle and ModDev examples. Fabric uses its ordinary runtime class path and automatically detects development mode.
-
-Declare `eqlib` as required in the consumer's loader metadata; [API installation](API.md#install-the-dependency) shows the metadata entries. Keep your own Minecraft and Fabric API dependencies matched to your game. Neither the universal publication nor its compile API pulls a game-specific Fabric API into your mod.
+Publish both the main runtime artifact and the development API classifiers for mod developers. The Fabric 26.2/26.3 pair publishes separate `dev-fabric_26.2` and `dev-fabric_26.3` classifiers despite sharing an implementation. Consumer configuration is documented in the [API installation guide](API.md#install-the-dependency).
 
 ## Shared logic and validation
 
-`shared/core` contains Java 8 utilities without Minecraft references. Clock timing and model-hand mesh parsing are shared with MDM; model resources and renderers remain consumer-owned. Compatible adapter sources are shared where their APIs permit it, while source groups identify exactly which targets compile each implementation.
+`shared/core` contains Java 8 utilities without Minecraft references. Clock timing and model-hand mesh parsing are available to every consumer; your mod supplies model resources and renderers. Compatible adapter sources are shared where their APIs permit it, while source groups identify exactly which targets compile each implementation.
 
 `tools/verify_universal_bundle.py` checks the payload matrix, metadata, core uniqueness, bytecode levels, and development API outputs. `tools/verify_bootstrap.py` additionally runs extraction, isolated core linkage, corrupt-cache repair, and unsupported-target checks on Java 8 (set `JAVA8_HOME` if needed). `tools/verify_boundaries.py` checks source independence and mixin ownership. These checks complement real game runs; they do not prove runtime mixin or rendering compatibility by themselves.
 
-The Fabric 26.2/26.3 integration fixture is `tests/universal-fabric-runtime.gradle`. Applied with `-I` to an MDM target, it verifies placements, saved offsets and packets, seating, and clean server shutdown. With `-PuniversalClient` it also opens a prepared world and captures valid/blocked placement previews. Other loader/game regressions use MDM's isolated placement unload tests and its legacy smoke fixture. Generated logs and result markers are kept under ignored `build/` directories.
+Before releasing the library, validate a consumer test mod in a client and a dedicated server for every supported target. Test normal and precise placement, blocked cells, helper interactions and removal, seating and dismount cleanup, and saved offsets after world reload and chunk unload. Check both valid and blocked placement previews on the client. See the [API validation checklist](API.md#validation-checklist) for details.
 
-From the Modern Decorations checkout, reproduce the complete server matrix with:
+The fixtures under `tests/` support integration testing but require a consumer test project with matching block registrations and run configuration; they are not standalone tests for an arbitrary mod. Generated logs and result markers belong under ignored `build/` directories.
 
-```powershell
-python tools/verify-eqlib-runtime.py --offline
-```
-
-Omit `--offline` when dependencies are not cached. The runner keeps a checksum-locked artifact throughout all targets and writes per-target logs and a report under `build/eqlib-runtime/`. Use `python tools/verify-eqlib-matrix.py` for complete consumer builds and standalone regression checks. Data-generation run graphs also install the universal runtime before launch.
-
-After the matrix, bootstrap, and client checks pass, run `python tools/record_universal_validation.py --consumer "<MDM-checkout>"` from the library checkout to record the current artifact checksum and evidence in `dist/universal-validation.json`. The report distinguishes development game runs from production adapter builds.
+`tools/record_universal_validation.py --consumer "<consumer-checkout>"` records evidence for the current artifact in `dist/universal-validation.json`. It requires the specific build reports, runtime markers, and client results expected by that script. Use it only with a test project implementing that report layout; it does not run the tests itself.

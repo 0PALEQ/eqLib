@@ -1,28 +1,26 @@
-# MacOS DS_Store files
+# Operating-system files
 .DS_Store
+Thumbs.db
 
 # Gradle cache folder
-.gradle
+.gradle/
 
 # Gradle build folder
-build
+build/
 
 # IntelliJ
 out/
-.idea
+.idea/
 *.iml
-# mpeltonen/sbt-idea plugin
-.idea_modules/
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
 # Common working directory
-run
+run/
 
 # Generated local Maven publications
 maven/
-__pycache__/
 
 # Generated universal distribution
 dist/
@@ -31,6 +29,7 @@ dist/
 .eqlib/
 
 # Python bytecode and local environments
+__pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
@@ -44,4 +43,3 @@ local.properties
 *.log
 *.tmp
 *.bak
-Thumbs.db
