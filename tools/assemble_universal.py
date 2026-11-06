@@ -15,6 +15,12 @@ CACHE=Path.home()/'.gradle/caches/modules-2/files-2.1'
 BUILD=ROOT/'build/universal'
 JAVA=jdk(25)
 
+def prepare_classes(output):
+    output.mkdir(parents=True, exist_ok=True)
+    for compiled in output.rglob('*.class'):
+        compiled.unlink()
+    return output
+
 def artifact(group,name,version):
     return next(p for p in (CACHE/group/name/version).glob('*/*.jar') if not any(s in p.name for s in ['sources','javadoc']))
 
@@ -22,7 +28,7 @@ def properties(path):
     return dict(line.split('=',1) for line in path.read_text().splitlines() if '=' in line and not line.startswith('#'))
 
 def compile_bootstrap():
-    output=BUILD/'bootstrap';output.mkdir(parents=True,exist_ok=True)
+    output=prepare_classes(BUILD/'bootstrap')
     # Only compile against the bootstrap contracts and their signature dependencies.
     # A broad cache class path can silently select incompatible APIs or javac plugins.
     others=[]
@@ -60,7 +66,7 @@ def without_core(data):
         return zip_bytes({name:jar.read(name) for name in jar.namelist() if not name.startswith('com/cookiecraftmods/eqlib/core/') and not name.endswith('/')})
 
 def compile_core():
-    output=BUILD/'core';output.mkdir(parents=True,exist_ok=True)
+    output=prepare_classes(BUILD/'core')
     gson=next(p for p in (CACHE/'com.google.code.gson/gson').glob('*/*/*.jar') if not any(s in p.name for s in ['sources','javadoc']))
     args=['--release','8','-proc:none','-encoding','UTF-8','-classpath',str(gson),'-d',str(output),*map(str,(ROOT/'shared/core').rglob('*.java'))]
     argfile=BUILD/'core-javac.args';argfile.write_text('\n'.join('"'+arg.replace('\\','/')+'"' for arg in args))

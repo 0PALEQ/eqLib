@@ -16,7 +16,7 @@ The selected payload is combined with the neutral core in a hash-addressed `.eql
 
 Production adapters retain the mappings and reobfuscation of their individual loader builds. Development adapters retain named mappings. The bootstrap detects the environment; Forge development runs explicitly set `eqlib.development=true`. This property belongs in development runs only. Both sets are inside the same runtime download, so consumers do not need a separate development runtime.
 
-Fabric 26.2 and 26.3 reuse one payload. Its cached seating compatibility handle resolves the invulnerability method available in the running game. Other incompatible game APIs use separate adapters; widening a dependency range is insufficient to merge them.
+Fabric 26.2 and 26.3 reuse one payload. Its cached seating compatibility handle resolves the invulnerability method available in the running game. NeoForge 26.3 has a dedicated adapter built against NeoForge 26.3.0.99 and publishes the `dev-neoforge_26.3` development classifier. Other incompatible game APIs use separate adapters; widening a dependency range is insufficient to merge them.
 
 ## Build and publish
 

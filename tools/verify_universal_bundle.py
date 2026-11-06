@@ -12,7 +12,7 @@ TARGETS = {
     'fabric_1.20.1', 'fabric_1.21.1', 'fabric_1.21.11',
     'fabric_26.1.2', 'fabric_26.2', 'fabric_26.3',
     'forge_1.16.5', 'forge_1.19.2', 'forge_1.20.1',
-    'neoforge_1.21.1', 'neoforge_1.21.11', 'neoforge_26.1.2', 'neoforge_26.2',
+    'neoforge_1.21.1', 'neoforge_1.21.11', 'neoforge_26.1.2', 'neoforge_26.2', 'neoforge_26.3',
 }
 
 

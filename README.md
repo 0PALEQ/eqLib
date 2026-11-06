@@ -17,11 +17,11 @@ For mod authors, start with [choosing an integration path](docs/API.md#choose-an
 | 1.21.11 | Fabric, NeoForge |
 | 26.1.2 | Fabric, NeoForge |
 | 26.2 | Fabric, NeoForge |
-| 26.3 | Fabric |
+| 26.3 | Fabric, NeoForge |
 
 Use a consumer mod built for your exact Minecraft version and loader. The universal library does not make a consumer mod compatible with other targets.
 
-## Build and publish
+## Build
 
 Build and verify the universal distribution:
 

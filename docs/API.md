@@ -433,7 +433,7 @@ A plan exposes `state`, `pos`, `offset`, `shape`, and `valid` through accessors.
 | Supported Fabric targets | Registered `Block` | Resolve after the block has been registered. |
 | Forge 1.16.5, 1.19.2, 1.20.1 | `RegistryObject<Block>` | The setter records its ID without resolving the block early. |
 | NeoForge 1.21.1 | `DeferredBlock<Block>` | Pass the holder, preserving deferred registration. |
-| NeoForge 1.21.11, 26.1.2, 26.2 | `Identifier` | Pass the block ID, for example your holder's `getId()`, rather than resolving its block during static initialization. |
+| NeoForge 1.21.11, 26.1.2, 26.2, 26.3 | `Identifier` | Pass the block ID, for example your holder's `getId()`, rather than resolving its block during static initialization. |
 
 Further differences:
 
