@@ -1,0 +1,11 @@
+def metadata = new Properties()
+project.file('../../gradle.properties').withInputStream { metadata.load(new InputStreamReader(it, 'UTF-8')) }
+def sharedMetadata = metadata.findAll { key, value -> key.startsWith('mod_') || key in ['maven_group', 'archives_base_name'] }
+sharedMetadata.each { key, value ->
+    project.ext.set(key.toString(), value.toString())
+}
+project.group = metadata.getProperty('maven_group')
+
+tasks.named('processResources') {
+    inputs.properties(sharedMetadata)
+}

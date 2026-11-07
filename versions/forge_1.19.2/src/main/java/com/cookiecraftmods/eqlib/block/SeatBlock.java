@@ -37,8 +37,11 @@ public final class SeatBlock {
     private static void track(Level level, ArmorStand seat) {
         for (String tag : seat.getTags()) {
             if (tag.startsWith(OWNER_TAG)) {
-                SEATS.computeIfAbsent(level, ignored -> new HashMap<>())
-                        .put(tag, new java.lang.ref.WeakReference<>(seat));
+                Map<String, java.lang.ref.WeakReference<ArmorStand>> seats = SEATS.computeIfAbsent(level, ignored -> new HashMap<>());
+                java.lang.ref.WeakReference<ArmorStand> reference = seats.get(tag);
+                if (reference == null || reference.get() != seat) {
+                    seats.put(tag, new java.lang.ref.WeakReference<>(seat));
+                }
                 return;
             }
         }

@@ -6,8 +6,11 @@ plugins {
 if (providers.gradleProperty('eqlibBuildDir').isPresent()) {
     layout.buildDirectory = file(providers.gradleProperty('eqlibBuildDir').get())
 }
+apply from: project.file('../../shared/gradle/mod-metadata.gradle')
+
 version = project.mod_version
 def libraryVersion = project.version.toString()
+def libraryMetadata = [version: libraryVersion, mod_version: libraryVersion, mod_id: project.mod_id, mod_name: project.mod_name, mod_description: project.mod_description, mod_license: project.mod_license]
 base.archivesName = project.archives_base_name
 
 tasks.withType(org.gradle.api.tasks.bundling.AbstractArchiveTask).configureEach {
@@ -57,7 +60,7 @@ java { withSourcesJar() }
 processResources {
     inputs.property 'libraryVersion', libraryVersion
     filesMatching(['fabric.mod.json', 'META-INF/mods.toml', 'META-INF/neoforge.mods.toml']) {
-        expand(version: libraryVersion, mod_version: libraryVersion)
+        expand(libraryMetadata)
     }
 }
 // This adapter is an internal build input; the root tooling publishes the universal distribution.

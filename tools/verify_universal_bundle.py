@@ -4,8 +4,9 @@ import hashlib
 import io
 import json
 import struct
+import tomllib
 import zipfile
-from project_paths import runtime_jar
+from project_paths import runtime_jar, mod_metadata
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS = {
@@ -34,7 +35,9 @@ def verify():
         require(set(index) == {t + '.' + m for t in TARGETS for m in ['prod', 'dev']}, 'Unexpected adapter matrix')
         fabric = json.loads(outer.read('fabric.mod.json'))
         require(set(fabric['depends']['minecraft']) == {t.split('_', 1)[1] for t in TARGETS if t.startswith('fabric_')}, 'Wrong Fabric support range')
-        require(fabric['id'] == 'eqlib', 'Wrong mod ID')
+        metadata = mod_metadata()
+        for field, key in [('id', 'mod_id'), ('version', 'mod_version'), ('name', 'mod_name'), ('description', 'mod_description'), ('license', 'mod_license')]:
+            require(fabric[field] == metadata[key], 'Wrong universal metadata: ' + field)
         with zipfile.ZipFile(io.BytesIO(outer.read('META-INF/eqlib/core.jar'))) as core:
             require(core.namelist(), 'Empty neutral core')
             for name in core.namelist():
@@ -46,6 +49,16 @@ def verify():
                 with zipfile.ZipFile(io.BytesIO(outer.read(index[target + '.' + mode]))) as adapter:
                     require(adapter.namelist()[0] == 'META-INF/MANIFEST.MF', 'Adapter manifest must be first: ' + target)
                     names = set(adapter.namelist())
+                    if target.startswith('fabric_'):
+                        adapter_metadata = json.loads(adapter.read('fabric.mod.json'))
+                        fields = [('id', 'mod_id'), ('version', 'mod_version'), ('name', 'mod_name'), ('description', 'mod_description'), ('license', 'mod_license')]
+                    else:
+                        descriptor = 'META-INF/' + ('mods.toml' if target.startswith('forge_') else 'neoforge.mods.toml')
+                        document = tomllib.loads(adapter.read(descriptor).decode())
+                        adapter_metadata = {**document['mods'][0], 'license': document['license']}
+                        fields = [('modId', 'mod_id'), ('version', 'mod_version'), ('displayName', 'mod_name'), ('description', 'mod_description'), ('license', 'mod_license')]
+                    for field, key in fields:
+                        require(adapter_metadata[field] == metadata[key], 'Wrong adapter metadata: ' + target + ':' + mode + ':' + field)
                     require('com/cookiecraftmods/eqlib/api/FurnitureApi.class' in names, 'Missing public API: ' + target)
                     require(not any(n.startswith('com/cookiecraftmods/eqlib/core/') for n in names), 'Duplicated core: ' + target)
                     config = json.loads(adapter.read('eqlib.mixins.json'))

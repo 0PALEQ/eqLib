@@ -1,8 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "eqlib",
+  "id": "${mod_id}",
   "version": "${version}",
-  "name": "opaleq's Library",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "license": "${mod_license}",
   "icon": "icon.png",
   "environment": "*",
   "mixins": [

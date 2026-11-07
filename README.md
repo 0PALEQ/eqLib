@@ -23,6 +23,8 @@ Use a consumer mod built for your exact Minecraft version and loader. The univer
 
 ## Build
 
+Edit the root `gradle.properties` to change shared mod metadata: version, ID, name, description, license, Maven group, and archive name. Every adapter and the universal packaging tools use these values. Version-specific properties retain Minecraft, loader, mappings, and JVM settings.
+
 Build and verify the universal distribution:
 
 ```powershell
@@ -35,7 +37,7 @@ Distribute `dist/eqlib-<mod_version>.jar`. The assembly command builds all requi
 
 To also publish the universal runtime and development API classifiers to the local `maven/` repository, use `python tools/assemble_universal.py --publish`.
 
-The packaging tools currently invoke Windows Java executables (`java.exe`/`javac.exe`); use Windows with Python 3 and JDKs 17, 21, and 25. Forge 1.16.5 emits Java 8 bytecode. The matrix discovers installed JDKs or accepts `JAVA17_HOME`, `JAVA21_HOME`, and `JAVA25_HOME`. The root Gradle `build` and `publishUniversal` tasks wrap assembly and publication respectively; they do not run the separate verification scripts. Logs and internal adapters are kept under ignored build directories.
+The packaging tools currently invoke Windows Java executables (`java.exe`/`javac.exe`); use Windows with Python 3.11+ and JDKs 17, 21, and 25. Forge 1.16.5 emits Java 8 bytecode. The matrix discovers installed JDKs or accepts `JAVA17_HOME`, `JAVA21_HOME`, and `JAVA25_HOME`. The root Gradle `build` and `publishUniversal` tasks wrap assembly and publication respectively; they do not run the separate verification scripts. Logs and internal adapters are kept under ignored build directories.
 
 The main Maven artifact is `com.cookiecraftmods:eqlib:${eqlib_version}`. Development API classifiers are `dev-<loader>_<minecraft>`. Set `eqlib_version` to your chosen published release. The local repository is `maven/`; no public repository or hosting service is configured.
 

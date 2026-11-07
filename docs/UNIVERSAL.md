@@ -37,7 +37,7 @@ To also publish the universal runtime and development API classifiers to the loc
 python tools/assemble_universal.py --publish
 ```
 
-The output is `dist/eqlib-<mod_version>.jar`. The filename follows `mod_version` in `versions/fabric_26.2-26.3/gradle.properties`. Publication writes a main universal runtime and development API classifiers to the checkout's local `maven/` repository. Internal adapters are build inputs, not additional installation requirements.
+The output is `dist/eqlib-<mod_version>.jar`. The filename follows `mod_version` in the root `gradle.properties`. Publication writes a main universal runtime and development API classifiers to the checkout's local `maven/` repository. Internal adapters are build inputs, not additional installation requirements.
 
 Publish both the main runtime artifact and the development API classifiers for mod developers. The Fabric 26.2/26.3 pair publishes separate `dev-fabric_26.2` and `dev-fabric_26.3` classifiers despite sharing an implementation. Consumer configuration is documented in the [API installation guide](API.md#install-the-dependency).
 

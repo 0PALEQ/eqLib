@@ -7,8 +7,9 @@ import json
 import os
 import subprocess
 import zipfile
+from xml.sax.saxutils import escape
 from java_tools import jdk
-from project_paths import runtime_jar
+from project_paths import runtime_jar, mod_metadata
 
 ROOT=Path(__file__).resolve().parents[1]
 CACHE=Path.home()/'.gradle/caches/modules-2/files-2.1'
@@ -74,11 +75,11 @@ def compile_core():
     return zip_bytes({p.relative_to(output).as_posix():p.read_bytes() for p in output.rglob('*.class')})
 
 def payloads(target):
-    props=properties(target/'gradle.properties')
+    props={**properties(target/'gradle.properties'), **mod_metadata()}
     label=props.get('library_target',props['minecraft_version'])
-    filename='eqlib-'+props['mod_version']+'-'+props['loader_name']+'-'+label+'.jar'
+    filename=props['archives_base_name']+'-'+props['mod_version']+'-'+props['loader_name']+'-'+label+'.jar'
     candidates=[target/'build/publishing/libs'/filename,target/'build/libs'/filename]
-    if target.name=='forge_1.16.5':candidates += [target/'build/libs'/('eqlib-'+props['mod_version']+'.jar')]
+    if target.name=='forge_1.16.5':candidates += [target/'build/libs'/(props['archives_base_name']+'-'+props['mod_version']+'.jar')]
     production=max((p for p in candidates if p.exists()),key=lambda p:p.stat().st_mtime)
     with zipfile.ZipFile(production) as archive: manifest=archive.read('META-INF/MANIFEST.MF')
     entries={}
@@ -94,7 +95,8 @@ def payloads(target):
 def assemble():
     classes=compile_bootstrap()
     core=compile_core()
-    version=properties(ROOT/'versions/fabric_26.2-26.3/gradle.properties')['mod_version']
+    metadata=mod_metadata()
+    version=metadata['mod_version']
     entries={p.relative_to(classes).as_posix():p.read_bytes() for p in classes.rglob('*.class')}
     entries['META-INF/MANIFEST.MF']=('Manifest-Version: 1.0\r\nAutomatic-Module-Name: com.cookiecraftmods.eqlib.bootstrap\r\nFMLModType: LIBRARY\r\nImplementation-Version: '+version+'\r\n\r\n').encode()
     entries['META-INF/eqlib/core.jar']=core
@@ -121,7 +123,7 @@ def assemble():
             api.parent.mkdir(parents=True,exist_ok=True)
             api.write_bytes(development_api)
     entries['META-INF/eqlib/adapters.properties']=('\n'.join(index)+'\n').encode()
-    entries['fabric.mod.json']=json.dumps({'schemaVersion':1,'id':'eqlib','version':version,'name':"opaleq's Library",'icon':'icon.png','environment':'*','mixins':['eqlib.mixins.json'],'depends':{'minecraft':sorted(games),'java':'>=8','fabricloader':'>=0.16.14'}},indent=2).encode()
+    entries['fabric.mod.json']=json.dumps({'schemaVersion':1,'id':metadata['mod_id'],'version':version,'name':metadata['mod_name'],'description':metadata['mod_description'],'license':metadata['mod_license'],'icon':'icon.png','environment':'*','mixins':['eqlib.mixins.json'],'depends':{'minecraft':sorted(games),'java':'>=8','fabricloader':'>=0.16.14'}},indent=2).encode()
     entries['eqlib.mixins.json']=json.dumps({'required':True,'minVersion':'0.8','package':'com.cookiecraftmods.eqlib.mixin','compatibilityLevel':'JAVA_8','plugin':'com.cookiecraftmods.eqlib.bootstrap.fabric.MixinSelector','mixins':[],'client':[],'injectors':{'defaultRequire':1}},indent=2).encode()
     services={
         'net.minecraftforge.forgespi.locating.IModLocator':'com.cookiecraftmods.eqlib.bootstrap.forge.LegacyLocator',
@@ -142,16 +144,18 @@ def assemble():
     return output
 
 def publish(output):
-    version=properties(ROOT/'versions/fabric_26.2-26.3/gradle.properties')['mod_version']
-    repository=ROOT/'maven/com/cookiecraftmods/eqlib'/version
+    metadata=mod_metadata()
+    version=metadata['mod_version']
+    artifact_name=metadata['archives_base_name']
+    repository=ROOT/'maven'/metadata['maven_group'].replace('.', '/')/artifact_name/version
     repository.mkdir(parents=True,exist_ok=True)
-    (repository/('eqlib-'+version+'.jar')).write_bytes(output.read_bytes())
+    (repository/(artifact_name+'-'+version+'.jar')).write_bytes(output.read_bytes())
     for api in (ROOT/'build/api').glob('eqlib-*.jar'):
         target=api.stem.removeprefix('eqlib-')
         if target=='fabric_26.2-26.3':continue
-        (repository/('eqlib-'+version+'-dev-'+target+'.jar')).write_bytes(api.read_bytes())
-    pom=f"""<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><groupId>com.cookiecraftmods</groupId><artifactId>eqlib</artifactId><version>{version}</version><name>opaleq's Library</name><description>Universal runtime with Minecraft-specific development API classifiers.</description></project>"""
-    (repository/('eqlib-'+version+'.pom')).write_text(pom)
+        (repository/(artifact_name+'-'+version+'-dev-'+target+'.jar')).write_bytes(api.read_bytes())
+    pom=f"""<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><groupId>{escape(metadata['maven_group'])}</groupId><artifactId>{escape(artifact_name)}</artifactId><version>{version}</version><name>{escape(metadata['mod_name'])}</name><description>{escape(metadata['mod_description'])}</description></project>"""
+    (repository/(artifact_name+'-'+version+'.pom')).write_text(pom)
     for file in repository.iterdir():
         if file.suffix in ['.jar','.pom']:
             for algorithm in ['sha256','sha1']:
