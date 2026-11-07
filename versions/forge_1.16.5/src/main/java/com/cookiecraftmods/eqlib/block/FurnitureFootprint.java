@@ -58,6 +58,9 @@ public final class FurnitureFootprint {
         World level = context.getLevel();
         BlockPos parent = context.getClickedPos();
         for (BlockPos offset : offsets(fullShape(state, level, parent))) {
+            if (!FurniturePartBlock.X.getPossibleValues().contains(offset.getX() + 4)
+                    || !FurniturePartBlock.Y.getPossibleValues().contains(offset.getY() + 4)
+                    || !FurniturePartBlock.Z.getPossibleValues().contains(offset.getZ() + 4)) return null;
             BlockPos cell = parent.offset(offset);
             if (level.isOutsideBuildHeight(cell) || !level.getWorldBorder().isWithinBounds(cell)) return null;
             BlockState existing = level.getBlockState(cell);
